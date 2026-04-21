@@ -1,0 +1,23 @@
+{
+  "name": "Mariana & Jesús | Nuestra Historia",
+  "short_name": "M&J",
+  "description": "Galería fotográfica compartida para la boda de Mariana y Jesús",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#002b44",
+  "theme_color": "#003B5C",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

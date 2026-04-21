@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif:ital,wght@0,400..700;1,400..700&display=swap');
+@import "tailwindcss";
+
+@layer theme {
+  :root {
+    --background: #fdfdfd;
+    --foreground: #00212b;
+    --primary: #00212b;
+    --accent: #e9c176;
+    --accent-dark: #dab36a;
+    --accent-light: #ffdea5;
+    --accent-foreground: #412d00;
+    --surface-high: #ffffff;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --radius: 0.5rem;
+  }
+
+  @theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-primary: var(--primary);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    
+    --font-heading: "Noto Serif", serif;
+    --font-sans: "Inter", sans-serif;
+    
+    --radius-premium: var(--radius);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-heading);
+}
+
+/* Premium Utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 33, 43, 0.04);
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 50%, var(--accent-dark) 100%);
+}
+
+.premium-shadow {
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(197, 160, 89, 0) 0%,
+    rgba(197, 160, 89, 0.2) 50%,
+    rgba(197, 160, 89, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite linear;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 10px;
+  opacity: 0.5;
+}
+
+/* GPU Accelerated Animations */
+.animate-cinematic-up {
+  will-change: transform, opacity;
+  animation: cinematicUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes cinematicUp {
+  from {
+    transform: translate3d(0, 40px, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
