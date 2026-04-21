@@ -33,26 +33,26 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] p-6 overflow-hidden bg-[#05080a] text-white">
+    <div className="relative flex flex-col items-center justify-center min-h-[100dvh] p-6 overflow-hidden bg-[#F4EFE6] text-primary">
       {/* Cinematic Background with Ken Burns Effect */}
-      <div className="absolute inset-0 z-0 overflow-hidden bg-black">
+      <div className="absolute inset-0 z-0 overflow-hidden bg-[#F4EFE6]">
         <AnimatePresence mode="popLayout">
           <motion.div 
             key={bgIndex}
             initial={{ opacity: 0, scale: 1.15 }}
-            animate={{ opacity: 0.4, scale: 1 }}
+            animate={{ opacity: 0.6, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 4, ease: "easeInOut" }}
-            className="absolute inset-0 bg-cover bg-[70%_center] brightness-[1.15]"
+            className="absolute inset-0 bg-cover bg-[70%_center] brightness-[1.05]"
             style={{ backgroundImage: `url(${backgrounds[bgIndex]})` }}
           />
         </AnimatePresence>
         
-        {/* Subtle Navy Color Grading over Dark */}
-        <div className="absolute inset-0 bg-primary/30 mix-blend-color" />
+        {/* Light wash over the images for text legibility */}
+        <div className="absolute inset-0 bg-white/40 mix-blend-overlay" />
         
-        {/* Deep vignette gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05080a] via-transparent to-[#05080a]/60" />
+        {/* Beige vignette gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#F4EFE6] via-[#F4EFE6]/70 to-[#F4EFE6]/30" />
       </div>
 
       <AnimatePresence mode="wait">
@@ -64,10 +64,10 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
             exit={{ opacity: 0, scale: 1.1 }}
             className="z-50 flex flex-col items-center"
           >
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-[0.3em] uppercase text-white font-heading">
-              JESÚS & PAOLA
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-[0.3em] uppercase text-primary font-heading">
+              <span className="text-primary">MARIANA</span> <span className="text-accent">&</span> <span className="text-primary">JESÚS</span>
             </h1>
-            <div className="w-12 h-[1px] bg-white/40 mt-4 animate-pulse" />
+            <div className="w-12 h-[1px] bg-primary/20 mt-4 animate-pulse" />
           </motion.div>
         ) : (
           <motion.div
@@ -82,10 +82,10 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 1, ease: "easeOut" }}
             >
-              <h1 className="mb-2 text-4xl sm:text-5xl font-bold tracking-[0.1em] text-white font-heading uppercase">
-                JESÚS & PAOLA
+              <h1 className="mb-2 text-4xl sm:text-5xl font-bold tracking-[0.1em] font-heading uppercase">
+                <span className="text-primary">MARIANA</span> <span className="text-accent">&</span> <span className="text-primary">JESÚS</span>
               </h1>
-              <p className="mb-16 text-sm tracking-[0.4em] uppercase text-white/50 font-sans">
+              <p className="mb-16 text-sm tracking-[0.4em] uppercase text-primary/60 font-sans font-medium">
                 Nuestra Historia
               </p>
             </motion.div>
@@ -104,16 +104,16 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
                   placeholder="Tu Nombre"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-0 py-4 bg-transparent border-b border-primary/20 outline-none focus:border-white text-center text-xl transition-all duration-700 placeholder:text-white/20 text-white font-heading italic tracking-wide"
+                  className="w-full px-0 py-4 bg-transparent border-b border-primary/20 outline-none focus:border-primary text-center text-xl transition-all duration-700 placeholder:text-primary/30 text-primary font-heading italic tracking-wide"
                 />
-                <div className="absolute bottom-0 left-0 w-0 h-[1px] bg-white transition-all duration-700 group-focus-within:w-full" />
+                <div className="absolute bottom-0 left-0 w-0 h-[1px] bg-accent transition-all duration-700 group-focus-within:w-full" />
               </div>
 
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full py-5 text-sm font-semibold tracking-[0.2em] uppercase text-white transition-all rounded-2xl glass hover:bg-primary/40"
+                className="w-full py-5 text-sm font-semibold tracking-[0.2em] uppercase text-white transition-all rounded-2xl bg-primary hover:bg-accent hover:text-white premium-shadow"
               >
                 Entrar a la Galería
               </motion.button>
@@ -123,9 +123,9 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.4 }}
               transition={{ delay: 1.5 }}
-              className="mt-16 text-[10px] tracking-[0.3em] uppercase text-white/60"
+              className="mt-16 text-[10px] tracking-[0.3em] uppercase text-primary/50 font-medium"
             >
-              01 MAYO 2026
+              12 JUNIO 2026
             </motion.p>
           </motion.div>
         )}

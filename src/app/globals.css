@@ -3,16 +3,16 @@
 
 @layer theme {
   :root {
-    --background: #fdfdfd;
-    --foreground: #00212b;
-    --primary: #00212b;
-    --accent: #e9c176;
-    --accent-dark: #dab36a;
-    --accent-light: #ffdea5;
-    --accent-foreground: #412d00;
-    --surface-high: #ffffff;
-    --muted: #f1f5f9;
-    --muted-foreground: #64748b;
+    --background: #F4EFE6;
+    --foreground: #1A1A1A;
+    --primary: #1A1A1A;
+    --accent: #C5A059;
+    --accent-dark: #A67C00;
+    --accent-light: #E6C875;
+    --accent-foreground: #FFFFFF;
+    --surface-high: #FFFFFF;
+    --muted: #EBE4D5;
+    --muted-foreground: #6B6152;
     --radius: 0.5rem;
   }
 
