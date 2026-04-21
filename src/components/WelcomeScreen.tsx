@@ -43,16 +43,14 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
             animate={{ opacity: 0.6, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 4, ease: "easeInOut" }}
-            className="absolute inset-0 bg-cover bg-center brightness-100"
+            className="absolute inset-0 bg-cover bg-[45%_center] brightness-100"
             style={{ backgroundImage: `url(${backgrounds[bgIndex]})` }}
           />
         </AnimatePresence>
         
-        {/* Soft elegant frost overlay instead of white wash */}
-        <div className="absolute inset-0 bg-[#F4EFE6]/40 backdrop-blur-[2px]" />
-        
-        {/* Premium beige vignette gradient (darker at bottom, clear at top) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#F4EFE6] via-[#F4EFE6]/60 to-[#F4EFE6]/10" />
+        {/* Gradient that is 100% transparent at the top so the photo looks completely natural, 
+            only becoming beige at the very bottom for the form */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#F4EFE6] via-[#F4EFE6]/30 to-transparent" />
       </div>
 
       <AnimatePresence mode="wait">
