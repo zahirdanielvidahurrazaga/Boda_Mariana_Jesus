@@ -4,8 +4,8 @@
   "description": "Galería fotográfica compartida para la boda de Mariana y Jesús",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#002b44",
-  "theme_color": "#003B5C",
+  "background_color": "#F4EFE6",
+  "theme_color": "#C5A059",
   "orientation": "portrait",
   "icons": [
     {
