@@ -37,60 +37,50 @@ export default function App() {
             transition={{ duration: 0.8 }}
             className="min-h-screen pb-44 bg-background"
           >
-            {/* Header */}
-            <header className="sticky top-0 z-30 w-full px-5 py-4 glass border-b border-primary/[0.07]">
-              <div className="flex items-center justify-between max-w-6xl mx-auto">
-                <div className="flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2.5">
-                    <h2 className="text-[17px] font-heading font-bold text-foreground tracking-[0.12em] uppercase leading-none">
-                      Mariana <span className="text-accent font-normal italic">&amp;</span> Jesús
-                    </h2>
-                    <span className="flex items-center gap-1 px-2 py-[3px] rounded-full bg-accent/[0.08] border border-accent/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                      <span className="text-[8px] tracking-[0.18em] uppercase text-accent font-sans font-semibold">En vivo</span>
-                    </span>
-                  </div>
-                  <p className="text-[8px] tracking-[0.4em] uppercase text-foreground/35 font-sans">
-                    Galería de Invitados
-                  </p>
-                </div>
-
+            {/* ── Header centrado ── */}
+            <header
+              className="sticky top-0 z-30 w-full border-b border-primary/[0.07]"
+              style={{
+                background: 'rgba(244,239,230,0.88)',
+                backdropFilter: 'blur(20px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+              }}
+            >
+              <div className="flex flex-col items-center text-center px-6 pt-5 pb-5">
+                <h2 className="font-heading font-bold text-foreground tracking-[0.08em] uppercase leading-none"
+                  style={{ fontSize: 'clamp(1.25rem, 5vw, 1.7rem)' }}>
+                  Mariana &amp; Jesús
+                </h2>
+                <p className="text-[7.5px] tracking-[0.45em] uppercase text-foreground/40 font-sans mt-1.5">
+                  Galería de Invitados
+                </p>
                 <button
                   onClick={handleLeave}
-                  className="px-3 py-1.5 text-[8px] tracking-[0.18em] font-semibold uppercase rounded-sm border border-foreground/12 text-foreground/45 hover:border-foreground/25 hover:text-foreground/70 transition-all duration-300 font-sans"
+                  className="mt-3.5 px-5 py-2 text-[8px] tracking-[0.22em] uppercase font-semibold border border-foreground/18 text-foreground/55 rounded-sm hover:border-foreground/35 hover:text-foreground/75 transition-all duration-300 font-sans"
                 >
-                  Cambiar
+                  Cambiar Invitado
                 </button>
               </div>
             </header>
 
-            {/* Hero title */}
-            <div className="max-w-6xl mx-auto px-5 mt-14 mb-16 text-center">
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
-                className="text-[9px] tracking-[0.4em] uppercase text-foreground/40 mb-4 font-sans"
-              >
-                Bienvenido, {guestName}
-              </motion.p>
-              <motion.h1
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                className="text-5xl sm:text-7xl md:text-[88px] font-bold font-heading text-foreground tracking-tight leading-[1.02]"
-              >
+            {/* ── Hero compacto ── */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="max-w-6xl mx-auto px-5 pt-9 pb-7 text-center"
+            >
+              <p className="text-[8px] tracking-[0.4em] uppercase text-foreground/35 font-sans mb-2.5">
+                Bienvenido a Nuestra Historia, {guestName}
+              </p>
+              <h1 className="font-heading font-bold text-foreground leading-tight"
+                style={{ fontSize: 'clamp(1.9rem, 7vw, 3rem)' }}>
                 Nuestra Historia
-              </motion.h1>
-              <motion.div
-                initial={{ scaleX: 0, opacity: 0 }}
-                animate={{ scaleX: 1, opacity: 1 }}
-                transition={{ delay: 0.55, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                className="w-10 h-[1px] bg-accent/50 mx-auto mt-7"
-              />
-            </div>
+              </h1>
+              <div className="w-8 h-[1px] bg-foreground/12 mx-auto mt-4" />
+            </motion.div>
 
-            {/* Gallery */}
+            {/* ── Gallery ── */}
             <div className="max-w-6xl mx-auto px-4 sm:px-5">
               <Gallery />
             </div>

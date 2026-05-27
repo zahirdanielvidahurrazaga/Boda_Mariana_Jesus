@@ -19,6 +19,14 @@ const STATUS_LABEL: Record<Status, string> = {
   error:       'Error al subir. Intenta de nuevo.',
 };
 
+const circleGlass = {
+  background: 'rgba(255,255,255,0.28)',
+  backdropFilter: 'blur(28px) saturate(180%) brightness(1.08)',
+  WebkitBackdropFilter: 'blur(28px) saturate(180%) brightness(1.08)',
+  border: '1px solid rgba(255,255,255,0.45)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 20px rgba(0,0,0,0.12)',
+};
+
 export default function UploadButton({ guestName }: UploadButtonProps) {
   const [status, setStatus] = useState<Status>('idle');
   const cameraRef = useRef<HTMLInputElement>(null);
@@ -62,74 +70,78 @@ export default function UploadButton({ guestName }: UploadButtonProps) {
   };
 
   return (
-    <div className="fixed bottom-7 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3.5">
-
-      {/* Status toast */}
+    <>
+      {/* ── Toast de estado ── */}
       <AnimatePresence>
         {status !== 'idle' && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.96 }}
+            exit={{ opacity: 0, y: -6, scale: 0.96 }}
             transition={{ duration: 0.28 }}
-            className={`flex items-center gap-2.5 px-5 py-2.5 rounded-full text-[10px] tracking-[0.18em] uppercase font-sans font-semibold whitespace-nowrap border
-              ${status === 'success' ? 'bg-background border-accent/25 text-primary shadow-lg shadow-black/[0.06]' :
-                status === 'error'   ? 'bg-background border-red-300/40 text-red-600 shadow-lg shadow-black/[0.06]' :
-                                       'bg-primary/92 border-transparent text-white shadow-xl shadow-black/20'}`}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-5 py-2.5 rounded-full text-[9.5px] tracking-[0.18em] uppercase font-sans font-semibold whitespace-nowrap"
+            style={{
+              ...circleGlass,
+              color: status === 'error' ? '#c0392b' : 'rgba(26,26,26,0.7)',
+            }}
           >
-            {isProcessing  && <Loader2 size={13} className="animate-spin" />}
-            {status === 'success' && <CheckCircle2 size={13} className="text-accent" />}
-            {status === 'error'   && <AlertCircle size={13} className="text-red-500" />}
+            {isProcessing        && <Loader2 size={12} className="animate-spin text-primary/50" />}
+            {status === 'success' && <CheckCircle2 size={12} className="text-primary/60" />}
+            {status === 'error'   && <AlertCircle size={12} className="text-red-400" />}
             <span>{STATUS_LABEL[status]}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Buttons pill */}
-      <div className="flex items-center gap-0 px-5 py-3.5 glass rounded-full border border-white/55 shadow-xl shadow-black/[0.08]">
+      {/* ── Dos círculos flotantes sobre la galería ── */}
+      <div className="fixed bottom-10 left-0 right-0 z-50 flex justify-around items-end px-8 max-w-2xl mx-auto">
 
-        {/* Gallery */}
+        {/* Galería */}
         <input type="file" ref={galleryRef} onChange={handleFile} accept="image/*" className="hidden" />
         <motion.button
-          whileHover={{ y: -2.5 }}
-          whileTap={{ scale: 0.92 }}
+          whileHover={{ scale: 1.06, y: -2 }}
+          whileTap={{ scale: 0.94 }}
           onClick={() => galleryRef.current?.click()}
           disabled={isProcessing}
-          className="flex flex-col items-center gap-2 px-4 disabled:opacity-45 disabled:cursor-not-allowed"
-        >
-          <div className="w-[52px] h-[52px] rounded-full bg-white/55 border border-white/80 shadow-sm flex items-center justify-center hover:bg-white/75 transition-colors duration-200">
-            {isProcessing
-              ? <Loader2 size={19} className="text-primary/60 animate-spin" />
-              : <ImageIcon size={19} className="text-primary/60" />
-            }
-          </div>
-          <span className="text-[8.5px] tracking-[0.1em] text-primary/40 font-sans leading-none">Galería</span>
-        </motion.button>
-
-        {/* Divider */}
-        <div className="w-px h-9 bg-primary/[0.07] mx-1" />
-
-        {/* Camera — gold accent */}
-        <input type="file" ref={cameraRef} onChange={handleFile} accept="image/*" capture="environment" className="hidden" />
-        <motion.button
-          whileHover={{ y: -2.5 }}
-          whileTap={{ scale: 0.92 }}
-          onClick={() => cameraRef.current?.click()}
-          disabled={isProcessing}
-          className="flex flex-col items-center gap-2 px-4 disabled:opacity-45 disabled:cursor-not-allowed"
+          className="flex flex-col items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <div
-            className="w-[52px] h-[52px] rounded-full gold-gradient flex items-center justify-center hover:opacity-88 transition-opacity duration-200"
-            style={{ boxShadow: '0 4px 16px -4px rgba(160,100,30,0.55)' }}
+            className="w-[70px] h-[70px] rounded-full flex items-center justify-center"
+            style={circleGlass}
           >
             {isProcessing
-              ? <Loader2 size={21} className="text-white animate-spin" />
-              : <Camera size={21} className="text-white" />
+              ? <Loader2 size={22} className="text-primary/55 animate-spin" />
+              : <ImageIcon size={22} className="text-primary/60" />
             }
           </div>
-          <span className="text-[8.5px] tracking-[0.1em] text-primary/40 font-sans leading-none">Cámara</span>
+          <span className="text-[8.5px] tracking-[0.12em] text-primary/40 font-sans leading-none">
+            Galería
+          </span>
+        </motion.button>
+
+        {/* Cámara */}
+        <input type="file" ref={cameraRef} onChange={handleFile} accept="image/*" capture="environment" className="hidden" />
+        <motion.button
+          whileHover={{ scale: 1.06, y: -2 }}
+          whileTap={{ scale: 0.94 }}
+          onClick={() => cameraRef.current?.click()}
+          disabled={isProcessing}
+          className="flex flex-col items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <div
+            className="w-[70px] h-[70px] rounded-full flex items-center justify-center"
+            style={circleGlass}
+          >
+            {isProcessing
+              ? <Loader2 size={24} className="text-primary/65 animate-spin" />
+              : <Camera size={24} className="text-primary/65" />
+            }
+          </div>
+          <span className="text-[8.5px] tracking-[0.12em] text-primary/40 font-sans leading-none">
+            Cámara
+          </span>
         </motion.button>
       </div>
-    </div>
+    </>
   );
 }
