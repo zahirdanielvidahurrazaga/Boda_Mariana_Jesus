@@ -1,164 +1,134 @@
-'use client';
-
 import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, ImageIcon, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { compressImage } from '@/lib/imageCompressor';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Image as ImageIcon, Loader2, CheckCircle2 } from 'lucide-react';
 
 interface UploadButtonProps {
   guestName: string;
 }
 
+type Status = 'idle' | 'compressing' | 'uploading' | 'saving' | 'success' | 'error';
+
+const STATUS_LABEL: Record<Status, string> = {
+  idle:        '',
+  compressing: 'Optimizando...',
+  uploading:   'Subiendo...',
+  saving:      'Guardando...',
+  success:     '¡Momento guardado!',
+  error:       'Error al subir. Intenta de nuevo.',
+};
+
 export default function UploadButton({ guestName }: UploadButtonProps) {
-  const [uploading, setUploading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [progress, setProgress] = useState('');
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [status, setStatus] = useState<Status>('idle');
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+
+  const isProcessing = status !== 'idle' && status !== 'success' && status !== 'error';
 
   const processUpload = async (file: File) => {
-    setUploading(true);
     try {
-      // Step 1: Compress image
-      setProgress('Optimizando...');
+      setStatus('compressing');
       const compressed = await compressImage(file);
 
-      // Step 2: Upload to Supabase Storage
-      setProgress('Subiendo...');
-      const fileExt = 'jpg'; // Always save as jpg after compression
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${fileExt}`;
-      const filePath = `photos/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
+      setStatus('uploading');
+      const path = `photos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const { error: storageError } = await supabase.storage
         .from('wedding-photos')
-        .upload(filePath, compressed, {
-          contentType: 'image/jpeg',
-          cacheControl: '31536000', // Cache 1 year (immutable content)
-        });
+        .upload(path, compressed, { contentType: 'image/jpeg', cacheControl: '31536000' });
+      if (storageError) throw storageError;
 
-      if (uploadError) throw uploadError;
-
-      // Step 3: Save to database
-      setProgress('Guardando...');
-      const { data: { publicUrl } } = supabase.storage
-        .from('wedding-photos')
-        .getPublicUrl(filePath);
-
+      setStatus('saving');
+      const { data: { publicUrl } } = supabase.storage.from('wedding-photos').getPublicUrl(path);
       const { error: dbError } = await supabase
         .from('photos')
-        .insert({
-          url: publicUrl,
-          guest_name: guestName,
-          event_id: 'default-event'
-        });
-
+        .insert({ url: publicUrl, guest_name: guestName, event_id: 'default-event' });
       if (dbError) throw dbError;
 
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 4000);
-    } catch (error: any) {
-      console.error('Upload failed:', error);
+      setStatus('success');
+      setTimeout(() => setStatus('idle'), 3500);
+    } catch {
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 4000);
     } finally {
-      setUploading(false);
-      setProgress('');
-      if (cameraInputRef.current) cameraInputRef.current.value = '';
-      if (galleryInputRef.current) galleryInputRef.current.value = '';
+      if (cameraRef.current)  cameraRef.current.value = '';
+      if (galleryRef.current) galleryRef.current.value = '';
     }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) await processUpload(file);
+    if (file) processUpload(file);
   };
 
   return (
-    <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-6">
+    <div className="fixed bottom-7 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-3.5">
+
+      {/* Status toast */}
       <AnimatePresence>
-        {uploading && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed bottom-32 px-8 py-4 bg-primary/90 backdrop-blur-xl rounded-full border border-primary/20 shadow-2xl flex items-center gap-4 z-50"
+        {status !== 'idle' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.96 }}
+            transition={{ duration: 0.28 }}
+            className={`flex items-center gap-2.5 px-5 py-2.5 rounded-full text-[10px] tracking-[0.18em] uppercase font-sans font-semibold whitespace-nowrap border
+              ${status === 'success' ? 'bg-background border-accent/25 text-primary shadow-lg shadow-black/[0.06]' :
+                status === 'error'   ? 'bg-background border-red-300/40 text-red-600 shadow-lg shadow-black/[0.06]' :
+                                       'bg-primary/92 border-transparent text-white shadow-xl shadow-black/20'}`}
           >
-            <Loader2 className="w-5 h-5 text-white animate-spin" />
-            <span className="text-xs tracking-[0.2em] uppercase text-white font-sans">{progress}</span>
+            {isProcessing  && <Loader2 size={13} className="animate-spin" />}
+            {status === 'success' && <CheckCircle2 size={13} className="text-accent" />}
+            {status === 'error'   && <AlertCircle size={13} className="text-red-500" />}
+            <span>{STATUS_LABEL[status]}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {success && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed bottom-32 px-8 py-4 glass rounded-full shadow-[0_8px_32px_rgba(0,59,92,0.12)] flex items-center gap-4 z-50 border border-primary/20"
-          >
-            <CheckCircle2 className="w-5 h-5 text-primary" />
-            <span className="text-xs font-bold tracking-[0.2em] uppercase text-primary font-sans">¡Momento Guardado!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Buttons pill */}
+      <div className="flex items-center gap-0 px-5 py-3.5 glass rounded-full border border-white/55 shadow-xl shadow-black/[0.08]">
 
-      <div className="flex items-center justify-center gap-10 px-6 py-4">
-        <div className="relative">
-          <input
-            type="file"
-            ref={galleryInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            className="hidden"
-          />
-          <motion.button
-            whileHover={{ y: -4, scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => galleryInputRef.current?.click()}
-            disabled={uploading}
-            className={`flex flex-col items-center justify-center gap-3 group transition-all w-20 ${
-              uploading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            <div className="w-16 h-16 rounded-full glass border border-primary/20 shadow-xl shadow-primary/5 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-              {uploading ? (
-                <Loader2 className="w-6 h-6 text-primary animate-spin" />
-              ) : (
-                <ImageIcon className="w-6 h-6 text-primary drop-shadow-sm" />
-              )}
-            </div>
-            <span className="text-[10px] tracking-[0.1em] text-primary/70 font-sans">Galería</span>
-          </motion.button>
-        </div>
+        {/* Gallery */}
+        <input type="file" ref={galleryRef} onChange={handleFile} accept="image/*" className="hidden" />
+        <motion.button
+          whileHover={{ y: -2.5 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={() => galleryRef.current?.click()}
+          disabled={isProcessing}
+          className="flex flex-col items-center gap-2 px-4 disabled:opacity-45 disabled:cursor-not-allowed"
+        >
+          <div className="w-[52px] h-[52px] rounded-full bg-white/55 border border-white/80 shadow-sm flex items-center justify-center hover:bg-white/75 transition-colors duration-200">
+            {isProcessing
+              ? <Loader2 size={19} className="text-primary/60 animate-spin" />
+              : <ImageIcon size={19} className="text-primary/60" />
+            }
+          </div>
+          <span className="text-[8.5px] tracking-[0.1em] text-primary/40 font-sans leading-none">Galería</span>
+        </motion.button>
 
-        <div className="relative">
-          <input
-            type="file"
-            ref={cameraInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-          />
-          <motion.button
-            whileHover={{ y: -4, scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => cameraInputRef.current?.click()}
-            disabled={uploading}
-            className={`flex flex-col items-center justify-center gap-3 group transition-all w-20 ${
-              uploading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+        {/* Divider */}
+        <div className="w-px h-9 bg-primary/[0.07] mx-1" />
+
+        {/* Camera — gold accent */}
+        <input type="file" ref={cameraRef} onChange={handleFile} accept="image/*" capture="environment" className="hidden" />
+        <motion.button
+          whileHover={{ y: -2.5 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={() => cameraRef.current?.click()}
+          disabled={isProcessing}
+          className="flex flex-col items-center gap-2 px-4 disabled:opacity-45 disabled:cursor-not-allowed"
+        >
+          <div
+            className="w-[52px] h-[52px] rounded-full gold-gradient flex items-center justify-center hover:opacity-88 transition-opacity duration-200"
+            style={{ boxShadow: '0 4px 16px -4px rgba(160,100,30,0.55)' }}
           >
-            <div className="w-16 h-16 rounded-full glass border border-primary/20 shadow-xl shadow-primary/5 flex items-center justify-center group-hover:bg-primary/5 transition-all relative overflow-hidden">
-              {uploading ? (
-                <Loader2 className="w-7 h-7 text-primary animate-spin relative z-10" />
-              ) : (
-                <Camera className="w-7 h-7 text-primary drop-shadow-sm relative z-10" />
-              )}
-            </div>
-            <span className="text-[10px] tracking-[0.1em] font-sans text-primary/70">Cámara</span>
-          </motion.button>
-        </div>
+            {isProcessing
+              ? <Loader2 size={21} className="text-white animate-spin" />
+              : <Camera size={21} className="text-white" />
+            }
+          </div>
+          <span className="text-[8.5px] tracking-[0.1em] text-primary/40 font-sans leading-none">Cámara</span>
+        </motion.button>
       </div>
     </div>
   );
