@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function App() {
   const [guestName, setGuestName] = useState<string | null>(null);
+  const [uploadCount, setUploadCount] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem('guest_name');
@@ -82,10 +83,10 @@ export default function App() {
 
             {/* ── Gallery ── */}
             <div className="max-w-6xl mx-auto px-4 sm:px-5">
-              <Gallery />
+              <Gallery refreshKey={uploadCount} />
             </div>
 
-            <UploadButton guestName={guestName} />
+            <UploadButton guestName={guestName} onUploadSuccess={() => setUploadCount(n => n + 1)} />
           </motion.div>
         )}
       </AnimatePresence>

@@ -6,6 +6,7 @@ import { compressImage } from '@/lib/imageCompressor';
 
 interface UploadButtonProps {
   guestName: string;
+  onUploadSuccess?: () => void;
 }
 
 type Status = 'idle' | 'compressing' | 'uploading' | 'saving' | 'success' | 'error';
@@ -27,14 +28,16 @@ const circleGlass = {
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 20px rgba(0,0,0,0.12)',
 };
 
-export default function UploadButton({ guestName }: UploadButtonProps) {
+export default function UploadButton({ guestName, onUploadSuccess }: UploadButtonProps) {
   const [status, setStatus] = useState<Status>('idle');
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [message, setMessage] = useState('');
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
   const isProcessing = status !== 'idle' && status !== 'success' && status !== 'error';
 
-  const processUpload = async (file: File) => {
+  const processUpload = async (file: File, msg?: string) => {
     try {
       setStatus('compressing');
       const compressed = await compressImage(file);
@@ -50,12 +53,19 @@ export default function UploadButton({ guestName }: UploadButtonProps) {
       const { data: { publicUrl } } = supabase.storage.from('wedding-photos').getPublicUrl(path);
       const { error: dbError } = await supabase
         .from('photos')
-        .insert({ url: publicUrl, guest_name: guestName, event_id: 'default-event' });
+        .insert({
+          url: publicUrl,
+          guest_name: guestName,
+          event_id: 'default-event',
+          ...(msg ? { message: msg } : {}),
+        });
       if (dbError) throw dbError;
 
       setStatus('success');
+      onUploadSuccess?.();
       setTimeout(() => setStatus('idle'), 3500);
-    } catch {
+    } catch (err) {
+      console.error('[UploadButton] error:', err);
       setStatus('error');
       setTimeout(() => setStatus('idle'), 4000);
     } finally {
@@ -64,9 +74,34 @@ export default function UploadButton({ guestName }: UploadButtonProps) {
     }
   };
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) processUpload(file);
+    if (!file) return;
+    // Leer el buffer inmediatamente — iOS Safari invalida el File original
+    // después de que el event handler completa y hay re-renders.
+    const buffer = await file.arrayBuffer();
+    const safe = new File([buffer], file.name || 'photo.jpg', {
+      type: 'image/jpeg',
+      lastModified: Date.now(),
+    });
+    setPendingFile(safe);
+    setMessage('');
+  };
+
+  const handleSubmit = () => {
+    if (!pendingFile) return;
+    const file = pendingFile;
+    const msg = message.trim() || undefined;
+    setPendingFile(null);
+    setMessage('');
+    processUpload(file, msg);
+  };
+
+  const handleCancel = () => {
+    setPendingFile(null);
+    setMessage('');
+    if (cameraRef.current)  cameraRef.current.value = '';
+    if (galleryRef.current) galleryRef.current.value = '';
   };
 
   return (
@@ -89,6 +124,73 @@ export default function UploadButton({ guestName }: UploadButtonProps) {
             {status === 'success' && <CheckCircle2 size={12} className="text-primary/60" />}
             {status === 'error'   && <AlertCircle size={12} className="text-red-400" />}
             <span>{STATUS_LABEL[status]}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Bottom sheet de mensaje ── */}
+      <AnimatePresence>
+        {pendingFile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] flex items-end"
+            style={{ background: 'rgba(13,10,7,0.55)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)' }}
+            onClick={handleCancel}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 32, stiffness: 300 }}
+              className="w-full rounded-t-[28px] px-7 pt-7 pb-14"
+              style={{ background: '#F4EFE6' }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Handle */}
+              <div className="w-9 h-1 rounded-full bg-primary/12 mx-auto mb-7" />
+
+              <p className="text-[8.5px] tracking-[0.4em] uppercase text-primary/35 font-sans mb-5">
+                Añade un mensaje (opcional)
+              </p>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={e => setMessage(e.target.value.slice(0, 20))}
+                  placeholder="Un momento especial..."
+                  maxLength={20}
+                  autoFocus
+                  className="w-full bg-transparent border-b border-primary/15 pb-2.5 pr-10 outline-none placeholder:text-primary/20 text-primary/75"
+                  style={{ fontFamily: 'Caveat, cursive', fontSize: '22px' }}
+                />
+                <span className="absolute right-0 bottom-3 text-[9px] text-primary/28 font-sans tabular-nums">
+                  {message.length}/20
+                </span>
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                className="mt-8 w-full py-4 rounded-full text-[10px] tracking-[0.3em] uppercase font-semibold font-sans transition-opacity active:opacity-70"
+                style={{
+                  background: 'rgba(197,160,89,0.12)',
+                  border: '1px solid rgba(197,160,89,0.4)',
+                  color: '#9A7035',
+                }}
+              >
+                Subir foto
+              </button>
+
+              <button
+                onClick={handleCancel}
+                className="mt-3 w-full py-2.5 text-[8.5px] tracking-[0.25em] uppercase text-primary/28 font-sans"
+              >
+                Cancelar
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

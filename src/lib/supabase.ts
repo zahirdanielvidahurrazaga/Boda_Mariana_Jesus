@@ -16,4 +16,5 @@ export type Photo = {
   event_id: string;
   width?: number;
   height?: number;
+  message?: string | null;
 };

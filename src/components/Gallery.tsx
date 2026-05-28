@@ -1,18 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MasonryPhotoAlbum } from 'react-photo-album';
 import 'react-photo-album/masonry.css';
 import { supabase, type Photo } from '@/lib/supabase';
 import Lightbox from './Lightbox';
 
-export default function Gallery() {
+const TILTS = [-1.4, 0.9, -0.6, 1.6, -1.0, 0.5, -1.9, 1.2, -0.4, 1.4, -0.8, 0.7];
+
+export default function Gallery({ refreshKey }: { refreshKey?: number }) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     fetchPhotos();
+  }, [refreshKey]);
 
+  useEffect(() => {
     const channel = supabase
       .channel('realtime:photos')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photos' }, payload => {
@@ -47,29 +51,76 @@ export default function Gallery() {
     height: p.height ?? 4,
     key: p.id,
     alt: p.guest_name,
+    guest_name: p.guest_name,
+    message: p.message ?? null,
   }));
 
-  const renderImage = useCallback((imageProps: React.ImgHTMLAttributes<HTMLImageElement>, { photo }: { photo: typeof formattedPhotos[0] }) => {
+  const renderImage = useCallback((
+    imageProps: React.ImgHTMLAttributes<HTMLImageElement>,
+    { photo }: { photo: typeof formattedPhotos[0] }
+  ) => {
     const index = formattedPhotos.findIndex(p => p.src === photo.src);
+    const tilt = TILTS[index % TILTS.length];
+
     return (
       <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-30px' }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0, y: 18, rotate: tilt }}
+        whileInView={{ opacity: 1, y: 0, rotate: tilt }}
+        whileHover={{ scale: 1.04, rotate: 0 }}
+        viewport={{ once: true, margin: '-20px' }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         onClick={() => setSelectedIndex(index)}
-        className="group relative overflow-hidden rounded-[2px] cursor-pointer bg-muted"
-        style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
+        className="cursor-pointer group"
+        style={{
+          background: '#fff',
+          padding: '6px 6px 54px 6px',
+          boxShadow: '0 3px 14px rgba(0,0,0,0.11), 0 1px 4px rgba(0,0,0,0.07)',
+          willChange: 'transform',
+        }}
       >
-        <img
-          {...imageProps}
-          className="w-full h-full object-cover transition-transform duration-[900ms] ease-out will-change-transform group-hover:scale-[1.045]"
-          loading="lazy"
-        />
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/[0.08] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none flex flex-col justify-end p-3.5">
-          <p className="text-[7.5px] tracking-[0.25em] uppercase text-white/40 font-sans mb-0.5">Capturado por</p>
-          <p className="text-white font-heading italic text-[1.05rem] leading-snug">{photo.alt}</p>
+        {/* Foto */}
+        <div
+          className="overflow-hidden"
+          style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
+        >
+          <img
+            src={photo.src}
+            alt={photo.alt}
+            loading="lazy"
+            style={{ display: 'block', width: '100%', height: '100%' }}
+            className="object-cover"
+            draggable={false}
+          />
+        </div>
+
+        {/* Firma Polaroid */}
+        <div
+          className="px-1.5 pt-2.5"
+          style={{ height: '54px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '1px' }}
+        >
+          {photo.message && (
+            <p
+              className="truncate"
+              style={{
+                fontFamily: 'Caveat, cursive',
+                fontSize: '14px',
+                color: 'rgba(26,26,26,0.48)',
+                lineHeight: 1.3,
+              }}
+            >
+              {photo.message}
+            </p>
+          )}
+          <p
+            style={{
+              fontFamily: 'Caveat, cursive',
+              fontSize: photo.message ? '16px' : '18px',
+              color: 'rgba(26,26,26,0.68)',
+              lineHeight: 1.2,
+            }}
+          >
+            — {photo.guest_name}
+          </p>
         </div>
       </motion.div>
     );
@@ -80,7 +131,9 @@ export default function Gallery() {
     return (
       <div className="columns-2 md:columns-3 lg:columns-4 gap-2.5 sm:gap-3.5">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="mb-2.5 sm:mb-3.5 break-inside-avoid rounded-[2px] overflow-hidden">
+          <div key={i} className="mb-2.5 sm:mb-3.5 break-inside-avoid overflow-hidden"
+            style={{ background: '#fff', padding: '6px 6px 54px 6px', boxShadow: '0 3px 14px rgba(0,0,0,0.08)' }}
+          >
             <div
               className="w-full skeleton"
               style={{ aspectRatio: ['3/4', '4/5', '2/3', '3/4'][i % 4] }}
@@ -122,21 +175,24 @@ export default function Gallery() {
         photos={formattedPhotos}
         render={{ image: renderImage }}
         columns={w => (w < 480 ? 2 : w < 768 ? 2 : w < 1024 ? 3 : 4)}
-        spacing={w => (w < 640 ? 10 : 14)}
+        spacing={w => (w < 640 ? 14 : 18)}
       />
 
       <div className="mt-20 text-center pb-4">
         <p className="text-[8.5px] tracking-[0.55em] uppercase text-primary/14 font-sans">#MarianayJesús</p>
       </div>
 
-      {selectedIndex !== null && (
-        <Lightbox
-          photos={photos}
-          currentIndex={selectedIndex}
-          onClose={() => setSelectedIndex(null)}
-          onNavigate={setSelectedIndex}
-        />
-      )}
+      <AnimatePresence>
+        {selectedIndex !== null && (
+          <Lightbox
+            key="lightbox"
+            photos={photos}
+            currentIndex={selectedIndex}
+            onClose={() => setSelectedIndex(null)}
+            onNavigate={setSelectedIndex}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }
