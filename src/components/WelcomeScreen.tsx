@@ -189,7 +189,7 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.5 }}
-              className="mt-8 text-center text-[8px] tracking-[0.4em] uppercase text-white/22 font-sans"
+              className="mt-8 text-center text-[8px] tracking-[0.4em] uppercase text-white/55 font-sans"
             >
               Comparte tu mirada de este día
             </motion.p>
