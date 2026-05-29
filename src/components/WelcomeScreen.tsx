@@ -155,7 +155,6 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Input — sobre fondo oscuro: todo blanco */}
               <div className="relative group">
-                <div className="w-full h-[1px] bg-white/15 mb-0" />
                 <input
                   type="text"
                   required
