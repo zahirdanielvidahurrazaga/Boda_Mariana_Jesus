@@ -128,7 +128,7 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
               </span>
             </h1>
 
-            <p className="mt-3 text-[8.5px] tracking-[0.55em] uppercase text-white/38 font-sans">
+            <p className="mt-3 text-[8.5px] tracking-[0.55em] uppercase text-white/70 font-sans" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>
               Nuestra Historia
             </p>
           </motion.div>
