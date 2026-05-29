@@ -48,7 +48,7 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
         {/* Scrim inferior oscuro para el form — sin crema */}
         <div
           className="absolute inset-x-0 bottom-0"
-          style={{ height: '55%', background: 'linear-gradient(to top, rgba(8,4,2,0.88) 0%, rgba(8,4,2,0.65) 45%, transparent 100%)' }}
+          style={{ height: '68%', background: 'linear-gradient(to top, rgba(8,4,2,0.97) 0%, rgba(8,4,2,0.92) 35%, rgba(8,4,2,0.70) 60%, transparent 100%)' }}
         />
         {/* Vignette lateral */}
         <div
@@ -162,7 +162,7 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
                   placeholder="Tu Nombre"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="w-full px-0 py-3.5 bg-transparent border-b border-white/20 outline-none text-center text-[1.35rem] transition-colors duration-500 placeholder:text-white/28 text-white/85 font-heading italic tracking-wide focus:border-white/45"
+                  className="w-full px-0 py-3.5 bg-transparent border-b border-white/35 outline-none text-center text-[1.35rem] transition-colors duration-500 placeholder:text-white/50 text-white font-heading italic tracking-wide focus:border-white/65"
                 />
                 <div className="absolute bottom-0 left-0 w-0 h-[1px] bg-accent origin-left transition-all duration-500 group-focus-within:w-full" />
               </div>
