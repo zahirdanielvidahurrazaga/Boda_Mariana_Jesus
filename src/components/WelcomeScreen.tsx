@@ -149,12 +149,13 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ delay: 0.95, duration: 0.8 }}
-              className="w-full h-[1px] bg-white/10 mb-9"
+              className="w-full h-[1px] bg-white/10 mb-5"
             />
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Input — sobre fondo oscuro: todo blanco */}
               <div className="relative group">
+                <div className="w-full h-[1px] bg-white/15 mb-0" />
                 <input
                   type="text"
                   required
@@ -162,7 +163,7 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
                   placeholder="Tu Nombre"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="w-full px-0 py-3.5 bg-transparent border-b border-white/35 outline-none text-center text-[1.35rem] transition-colors duration-500 placeholder:text-white/50 text-white font-heading italic tracking-wide focus:border-white/65"
+                  className="w-full px-0 py-4 bg-transparent border-b border-white/35 outline-none text-center text-[1.35rem] transition-colors duration-500 placeholder:text-white/50 text-white font-heading italic tracking-wide focus:border-white/65"
                 />
                 <div className="absolute bottom-0 left-0 w-0 h-[1px] bg-accent origin-left transition-all duration-500 group-focus-within:w-full" />
               </div>
