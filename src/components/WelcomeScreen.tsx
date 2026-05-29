@@ -144,14 +144,6 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
             transition={{ delay: 0.75, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
             className="z-10 w-full max-w-[360px] px-8 pb-12"
           >
-            {/* Divisor */}
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 0.95, duration: 0.8 }}
-              className="w-full h-[1px] bg-white/10 mb-0"
-            />
-
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Input — sobre fondo oscuro: todo blanco */}
               <div className="relative group">
