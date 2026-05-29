@@ -26,7 +26,13 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
         if (flushTimer.current) clearTimeout(flushTimer.current);
         flushTimer.current = setTimeout(() => {
           const batch = insertBuffer.current.splice(0);
-          if (batch.length > 0) setPhotos(prev => [...batch, ...prev]);
+          if (batch.length > 0) {
+            setPhotos(prev => {
+              const existing = new Set(prev.map(p => p.id));
+              const newOnes = batch.filter(p => !existing.has(p.id));
+              return newOnes.length > 0 ? [...newOnes, ...prev] : prev;
+            });
+          }
         }, 400);
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'photos' }, payload => {
