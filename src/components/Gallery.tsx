@@ -34,7 +34,18 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Re-fetch cuando el usuario vuelve a la app (teléfono desbloqueado, tab activa)
+    const handleVisibility = () => { if (!document.hidden) fetchPhotos(); };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // Fallback: re-fetch cada 30 segundos por si el realtime se cae
+    const poll = setInterval(fetchPhotos, 30_000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      clearInterval(poll);
+    };
   }, []);
 
   const fetchPhotos = async () => {
