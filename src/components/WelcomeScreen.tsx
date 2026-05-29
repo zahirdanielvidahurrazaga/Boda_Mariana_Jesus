@@ -104,11 +104,11 @@ export default function WelcomeScreen({ onJoin }: WelcomeScreenProps) {
               transition={{ delay: 0.25 }}
               className="flex items-center justify-center gap-3 mb-6"
             >
-              <div className="h-[1px] w-7 bg-accent/50" />
-              <span className="text-[8px] tracking-[0.55em] uppercase text-accent/85 font-sans font-medium whitespace-nowrap">
+              <div className="h-[1px] w-7 bg-accent/80" />
+              <span className="text-[8px] tracking-[0.55em] uppercase text-accent font-sans font-medium whitespace-nowrap" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>
                 XII · VI · MMXXVI
               </span>
-              <div className="h-[1px] w-7 bg-accent/50" />
+              <div className="h-[1px] w-7 bg-accent/80" />
             </motion.div>
 
             <h1
