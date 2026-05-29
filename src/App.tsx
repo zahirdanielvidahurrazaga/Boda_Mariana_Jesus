@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import WelcomeScreen from '@/components/WelcomeScreen';
 import Gallery from '@/components/Gallery';
 import UploadButton from '@/components/UploadButton';
+import AdminPage from '@/components/AdminPage';
 import { motion, AnimatePresence } from 'framer-motion';
+
+if (window.location.pathname === '/admin') {
+  document.title = 'Admin — Mariana & Jesús';
+}
 
 export default function App() {
   const [guestName, setGuestName] = useState<string | null>(null);
@@ -22,6 +27,10 @@ export default function App() {
     localStorage.removeItem('guest_name');
     setGuestName(null);
   };
+
+  if (window.location.pathname === '/admin') {
+    return <AdminPage />;
+  }
 
   return (
     <>
