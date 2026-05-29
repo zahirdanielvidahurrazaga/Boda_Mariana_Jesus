@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MasonryPhotoAlbum } from 'react-photo-album';
 import 'react-photo-album/masonry.css';
@@ -11,6 +11,8 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const insertBuffer = useRef<Photo[]>([]);
+  const flushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     fetchPhotos();
@@ -20,7 +22,12 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
     const channel = supabase
       .channel('realtime:photos')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photos' }, payload => {
-        setPhotos(prev => [payload.new as Photo, ...prev]);
+        insertBuffer.current.push(payload.new as Photo);
+        if (flushTimer.current) clearTimeout(flushTimer.current);
+        flushTimer.current = setTimeout(() => {
+          const batch = insertBuffer.current.splice(0);
+          if (batch.length > 0) setPhotos(prev => [...batch, ...prev]);
+        }, 400);
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'photos' }, payload => {
         setPhotos(prev => prev.filter(p => p.id !== (payload.old as Photo).id));
@@ -35,7 +42,8 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
       const { data, error } = await supabase
         .from('photos')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(300);
       if (error) throw error;
       setPhotos(data || []);
     } catch {
@@ -45,7 +53,7 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
     }
   };
 
-  const formattedPhotos = photos.map(p => ({
+  const formattedPhotos = useMemo(() => photos.map(p => ({
     src: p.url,
     width: p.width ?? 3,
     height: p.height ?? 4,
@@ -53,13 +61,12 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
     alt: p.guest_name,
     guest_name: p.guest_name,
     message: p.message ?? null,
-  }));
+  })), [photos]);
 
   const renderImage = useCallback((
-    imageProps: React.ImgHTMLAttributes<HTMLImageElement>,
-    { photo }: { photo: typeof formattedPhotos[0] }
+    _imageProps: React.ImgHTMLAttributes<HTMLImageElement>,
+    { photo, index }: { photo: { src: string; width: number; height: number; alt?: string; guest_name: string; message: string | null }; index: number }
   ) => {
-    const index = formattedPhotos.findIndex(p => p.src === photo.src);
     const tilt = TILTS[index % TILTS.length];
 
     return (
@@ -85,7 +92,7 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
         >
           <img
             src={photo.src}
-            alt={photo.alt}
+            alt={photo.alt ?? ''}
             loading="lazy"
             style={{ display: 'block', width: '100%', height: '100%' }}
             className="object-cover"
@@ -124,7 +131,7 @@ export default function Gallery({ refreshKey }: { refreshKey?: number }) {
         </div>
       </motion.div>
     );
-  }, [formattedPhotos]);
+  }, []);
 
   /* ── Loading skeleton ── */
   if (loading) {

@@ -1,15 +1,19 @@
-const MAX_DIMENSION = 1920;
+const MAX_DIMENSION = 1280;
 const QUALITY = 0.82;
 
-export async function compressImage(file: File): Promise<File> {
-  if (file.size < 500 * 1024) return file;
+export interface CompressResult {
+  file: File;
+  width: number;
+  height: number;
+}
 
+export async function compressImage(file: File): Promise<CompressResult> {
   return new Promise((resolve) => {
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
 
     img.onload = () => {
-      URL.revokeObjectURL(objectUrl); // prevent memory leak
+      URL.revokeObjectURL(objectUrl);
 
       let { width, height } = img;
       if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
@@ -18,12 +22,17 @@ export async function compressImage(file: File): Promise<File> {
         height = Math.round(height * ratio);
       }
 
+      if (file.size < 500 * 1024) {
+        resolve({ file, width, height });
+        return;
+      }
+
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
 
-      if (!ctx) { resolve(file); return; }
+      if (!ctx) { resolve({ file, width, height }); return; }
 
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
@@ -31,8 +40,15 @@ export async function compressImage(file: File): Promise<File> {
 
       canvas.toBlob(
         (blob) => {
-          if (!blob || blob.size >= file.size) { resolve(file); return; }
-          resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+          if (!blob || blob.size >= file.size) {
+            resolve({ file, width, height });
+            return;
+          }
+          resolve({
+            file: new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }),
+            width,
+            height,
+          });
         },
         'image/jpeg',
         QUALITY
@@ -41,7 +57,7 @@ export async function compressImage(file: File): Promise<File> {
 
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      resolve(file);
+      resolve({ file, width: 3, height: 4 });
     };
 
     img.src = objectUrl;

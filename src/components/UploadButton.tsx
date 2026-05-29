@@ -40,7 +40,7 @@ export default function UploadButton({ guestName, onUploadSuccess }: UploadButto
   const processUpload = async (file: File, msg?: string) => {
     try {
       setStatus('compressing');
-      const compressed = await compressImage(file);
+      const { file: compressed, width, height } = await compressImage(file);
 
       setStatus('uploading');
       const path = `photos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
@@ -57,6 +57,8 @@ export default function UploadButton({ guestName, onUploadSuccess }: UploadButto
           url: publicUrl,
           guest_name: guestName,
           event_id: 'default-event',
+          width,
+          height,
           ...(msg ? { message: msg } : {}),
         });
       if (dbError) throw dbError;
