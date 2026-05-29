@@ -17,7 +17,7 @@ export default function AdminPage() {
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode === 'MJ2026') {
+    if (passcode === '1234') {
       setIsAuthenticated(true);
     } else {
       alert('Código incorrecto');
