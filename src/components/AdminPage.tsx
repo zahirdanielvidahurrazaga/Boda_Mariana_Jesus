@@ -120,7 +120,7 @@ export default function AdminPage() {
               Entrar
             </button>
           </form>
-          <a href="/" className="block text-[8.5px] tracking-[0.3em] uppercase text-foreground/30 hover:text-foreground/50 transition-colors font-sans">
+          <a href="/#" className="block text-[8.5px] tracking-[0.3em] uppercase text-foreground/30 hover:text-foreground/50 transition-colors font-sans">
             ← Volver a la galería
           </a>
         </motion.div>
@@ -148,7 +148,7 @@ export default function AdminPage() {
               </p>
             </div>
             <a
-              href="/"
+              href="/#"
               className="text-[8.5px] tracking-[0.25em] uppercase text-foreground/45 hover:text-foreground/70 transition-colors font-sans border border-foreground/12 px-4 py-2"
             >
               ← Galería
